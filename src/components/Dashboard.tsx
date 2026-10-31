@@ -7,13 +7,11 @@ import { motion } from 'motion/react';
 
 interface DashboardProps {
   title: string;
+  dashboardType: 'telesales' | 'inbound';
   onBack: () => void;
 }
 
-const mockTableData = [
-  { name: 'Team Alpha', value1: '500', value2: '480', ratio: '96%' },
-  { name: 'Team Beta', value1: '740', value2: '700', ratio: '94.5%' },
-];
+
 
 const mockGraphData = Array.from({ length: 31 }, (_, i) => ({
   day: `${i + 1}`,
@@ -23,10 +21,10 @@ const mockGraphData = Array.from({ length: 31 }, (_, i) => ({
   all: Math.floor(Math.random() * 40) + 10,
 }));
 
-export function Dashboard({ title, onBack }: DashboardProps) {
+export function Dashboard({ title, dashboardType, onBack }: DashboardProps) {
   const [activeTab, setActiveTab] = useState('Number Insights');
 
-  const tabs = ['Number Insights', 'Graph', 'Agent Wise Order Summary', 'Raw Details'];
+  const tabs = ['Number Insights', 'Graph', 'Summary', 'Agent Wise Order Summary', 'Raw Details'];
 
   const renderChart = (dataKey: string, title: string, color: string) => (
     <motion.div 
@@ -47,7 +45,15 @@ export function Dashboard({ title, onBack }: DashboardProps) {
             labelFormatter={(label) => `Day: ${label}`}
             formatter={(value: number) => [value, 'Orders']}
           />
-          <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={{r: 3}} activeDot={{r: 6}} />
+          <Line 
+            type="monotone" 
+            dataKey={dataKey} 
+            stroke={color} 
+            strokeWidth={2} 
+            dot={{r: 3}} 
+            activeDot={{r: 6}} 
+            label={{ position: 'top', fontSize: 10, fill: color }} 
+          />
         </LineChart>
       </ResponsiveContainer>
     </motion.div>
@@ -71,7 +77,7 @@ export function Dashboard({ title, onBack }: DashboardProps) {
         </div>
       </header>
 
-      {activeTab === 'Number Insights' && (
+      {activeTab === 'Number Insights' && dashboardType === 'telesales' && (
         <div className="space-y-8">
           {metricCategories.map((cat, catIdx) => (
             <motion.div key={cat.category} initial={{opacity: 0}} animate={{opacity: 1}} transition={{delay: catIdx * 0.1}}>
@@ -83,8 +89,11 @@ export function Dashboard({ title, onBack }: DashboardProps) {
           ))}
         </div>
       )}
+      {activeTab === 'Number Insights' && dashboardType === 'inbound' && (
+        <div className="text-slate-500">No data available.</div>
+      )}
 
-      {activeTab === 'Graph' && (
+      {activeTab === 'Graph' && dashboardType === 'telesales' && (
         <div className="space-y-6">
           {renderChart('all', 'All Teams – Day-wise Order Trend', '#34d399')}
           {renderChart('acquisition', 'Acquisition Team – Day-wise Order Trend', '#38bdf8')}
@@ -92,9 +101,35 @@ export function Dashboard({ title, onBack }: DashboardProps) {
           {renderChart('kam', 'KAM Team – Day-wise Order Trend', '#f472b6')}
         </div>
       )}
+      {activeTab === 'Graph' && dashboardType === 'inbound' && (
+        <div className="text-slate-500">No data available.</div>
+      )}
+
+      {activeTab === 'Summary' && dashboardType === 'telesales' && (
+        <div className="space-y-6">
+          <DataTable 
+            title="Week wise Order Summary" 
+            headers={['Month', 'W1 (1-7)', 'W2 (8-14)', 'W3 (15-21)', 'W4 (22-End)', 'Total', 'Avg/Day W1', 'Avg/Day W2', 'Avg/Day W3', 'Avg/Day W4', 'Best Week']} 
+            data={[['Oct', 100, 120, 110, 130, 460, 14, 17, 15, 18, 'W4']]} 
+          />
+          <DataTable 
+            title="Category Wise" 
+            headers={['Date', 'Category', 'OJT', 'Acquisition', 'Retention', 'KAM', 'Total_Order_Count', 'Ratio']} 
+            data={[['31-Oct', 'General', 10, 5, 2, 1, 18, '80%']]} 
+          />
+          <DataTable 
+            title="Team Wise" 
+            headers={['Team', 'Create Order', 'Contribution Ratio', 'Agent Count', 'Order per Agent']} 
+            data={[['Acquisition', 150, '40%', 10, 15], ['Retention', 100, '30%', 8, 12.5]]} 
+          />
+        </div>
+      )}
+      {activeTab === 'Summary' && dashboardType === 'inbound' && (
+        <div className="text-slate-500">No data available.</div>
+      )}
 
       {activeTab === 'Agent Wise Order Summary' && (
-        <DataTable title="Team-wise Performance" headers={['Team', 'Target', 'Achieved', 'Efficiency']} data={mockTableData} />
+        <DataTable title="Team-wise Performance" headers={['Team', 'Target', 'Achieved', 'Efficiency']} data={[['Alpha', 500, 480, '96%'], ['Beta', 740, 700, '94.5%']]} />
       )}
     </div>
   );

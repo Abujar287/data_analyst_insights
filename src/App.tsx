@@ -19,6 +19,7 @@ export default function App() {
   return (
     <Dashboard 
       title={activeDashboardId === 'telesales' ? 'Telesales & KAM Team Insights' : 'Inbound & Facebook Team Insights'}
+      dashboardType={activeDashboardId === 'telesales' ? 'telesales' : 'inbound'}
       onBack={() => setActiveDashboardId(null)}
     />
   );
